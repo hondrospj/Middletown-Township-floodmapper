@@ -14298,6 +14298,8 @@ html.win-compact-ui #timelineDock #hourSlider{
     let FALLBACK_TOWN_MASK_RING = [];
     let FALLBACK_LATLNG_BOUNDS = null;
     let CONFIGURED_OVERLAY_LATLNG_BOUNDS = null;
+    let CONFIGURED_OVERLAY_CORNERS = null;
+    let CONFIGURED_OVERLAY_SIZE = null;
     let MUNICIPAL_BOUNDARY_BUNNY_URL = "";
     let MINOR_FLOOD_FT = 0;
     let MODERATE_FLOOD_FT = 0;
@@ -14445,7 +14447,11 @@ html.win-compact-ui #timelineDock #hourSlider{
       MUNICIPAL_BOUNDARY_BUNNY_URL = config.boundary?.bunnyBoundaryPath || config.boundary?.boundaryUrl || "";
       FALLBACK_TOWN_MASK_RING = [];
       FALLBACK_LATLNG_BOUNDS = null;
-      CONFIGURED_OVERLAY_LATLNG_BOUNDS = latLngBoundsFromBoundsObject(config.overlays?.rasterBounds || config.overlays?.overlayBounds);
+      CONFIGURED_OVERLAY_CORNERS = parseOverlayCorners(config.overlays?.rasterCorners || config.overlays?.overlayCorners);
+      CONFIGURED_OVERLAY_SIZE = parseOverlaySize(config.overlays?.rasterSize || config.overlays?.overlaySize);
+      CONFIGURED_OVERLAY_LATLNG_BOUNDS = CONFIGURED_OVERLAY_CORNERS
+        ? latLngBoundsFromOverlayCorners(CONFIGURED_OVERLAY_CORNERS)
+        : latLngBoundsFromBoundsObject(config.overlays?.rasterBounds || config.overlays?.overlayBounds);
 
       MINOR_FLOOD_FT = Number(config.thresholds?.navd88?.minor || 0);
       MODERATE_FLOOD_FT = Number(config.thresholds?.navd88?.moderate || 0);
@@ -15510,6 +15516,85 @@ function setDatumHelpOpen(isOpen) {
       };
     }
 
+    const CornerImageOverlay = L.Layer.extend({
+      initialize(url, corners, size, options) {
+        this._url = url;
+        this._corners = corners;
+        this._size = size;
+        L.setOptions(this, options);
+      },
+      onAdd(mapInstance) {
+        this._map = mapInstance;
+        if (!this._image) this._initImage();
+        (mapInstance.getPane(this.options.pane) || mapInstance.getPanes().overlayPane).appendChild(this._image);
+        mapInstance.on("zoom viewreset zoomend", this._reset, this);
+        this._reset();
+      },
+      onRemove(mapInstance) {
+        if (this._image) L.DomUtil.remove(this._image);
+        mapInstance.off("zoom viewreset zoomend", this._reset, this);
+      },
+      setOpacity(opacity) {
+        this.options.opacity = opacity;
+        if (this._image) this._image.style.opacity = opacity;
+        return this;
+      },
+      _initImage() {
+        const img = this._image = L.DomUtil.create("img", "leaflet-image-layer");
+        img.style.position = "absolute";
+        img.style.transformOrigin = "0 0";
+        img.style.width = `${this._size.width}px`;
+        img.style.height = `${this._size.height}px`;
+        img.style.maxWidth = "none";
+        img.style.maxHeight = "none";
+        img.style.pointerEvents = this.options.interactive ? "auto" : "none";
+        img.style.opacity = this.options.opacity ?? 1;
+        if (Number.isFinite(Number(this.options.zIndex))) img.style.zIndex = String(this.options.zIndex);
+        if (this.options.crossOrigin) img.crossOrigin = this.options.crossOrigin === true ? "" : this.options.crossOrigin;
+        img.onload = () => this.fire("load");
+        img.onerror = () => this.fire("error");
+        img.src = this._url;
+      },
+      _reset() {
+        if (!this._map || !this._image) return;
+        const topLeft = this._map.latLngToLayerPoint(this._corners.topLeft);
+        const topRight = this._map.latLngToLayerPoint(this._corners.topRight);
+        const bottomLeft = this._map.latLngToLayerPoint(this._corners.bottomLeft);
+        const bottomRight = this._corners.bottomRight ? this._map.latLngToLayerPoint(this._corners.bottomRight) : null;
+        const prop = L.DomUtil.TRANSFORM || "transform";
+        if (!bottomRight) {
+          const a = (topRight.x - topLeft.x) / this._size.width;
+          const b = (topRight.y - topLeft.y) / this._size.width;
+          const c = (bottomLeft.x - topLeft.x) / this._size.height;
+          const d = (bottomLeft.y - topLeft.y) / this._size.height;
+          this._image.style[prop] = `matrix(${a},${b},${c},${d},${topLeft.x},${topLeft.y})`;
+          return;
+        }
+        const x0 = topLeft.x, y0 = topLeft.y;
+        const x1 = topRight.x, y1 = topRight.y;
+        const x2 = bottomRight.x, y2 = bottomRight.y;
+        const x3 = bottomLeft.x, y3 = bottomLeft.y;
+        const dx1 = x1 - x2, dx2 = x3 - x2, dx3 = x0 - x1 + x2 - x3;
+        const dy1 = y1 - y2, dy2 = y3 - y2, dy3 = y0 - y1 + y2 - y3;
+        const det = dx1 * dy2 - dx2 * dy1;
+        if (Math.abs(det) < 1e-9) return;
+        const g = (dx3 * dy2 - dx2 * dy3) / det;
+        const h = (dx1 * dy3 - dx3 * dy1) / det;
+        const a = x1 - x0 + g * x1;
+        const b = x3 - x0 + h * x3;
+        const c = y1 - y0 + g * y1;
+        const d = y3 - y0 + h * y3;
+        this._image.style[prop] = `matrix3d(${a / this._size.width},${c / this._size.width},0,${g / this._size.width},${b / this._size.height},${d / this._size.height},0,${h / this._size.height},0,0,1,0,${x0},${y0},0,1)`;
+      }
+    });
+
+    function createFloodImageOverlay(url, options) {
+      if (CONFIGURED_OVERLAY_CORNERS && CONFIGURED_OVERLAY_SIZE) {
+        return new CornerImageOverlay(url, CONFIGURED_OVERLAY_CORNERS, CONFIGURED_OVERLAY_SIZE, options);
+      }
+      return L.imageOverlay(url, floodLatLngBounds, options);
+    }
+
     function getPrimaryMunicipalBoundaryRing() {
       return Array.isArray(municipalBoundaryRings) && municipalBoundaryRings.length ? municipalBoundaryRings[0] : FALLBACK_TOWN_MASK_RING;
     }
@@ -15579,6 +15664,35 @@ function normalizeBoundaryRingsFromArcGIS(rings, sourceWkid = 3857) {
       if (!sw || !ne) return null;
       const parsed = L.latLngBounds(sw, ne);
       return parsed && parsed.isValid && parsed.isValid() ? parsed : null;
+    }
+
+    function parseLatLngPoint(value) {
+      if (!value) return null;
+      const lat = Array.isArray(value) ? Number(value[0]) : Number(value.lat);
+      const lng = Array.isArray(value) ? Number(value[1]) : Number(value.lng ?? value.lon);
+      return Number.isFinite(lat) && Number.isFinite(lng) ? L.latLng(lat, lng) : null;
+    }
+
+    function parseOverlayCorners(corners) {
+      if (!corners || typeof corners !== "object") return null;
+      const topLeft = parseLatLngPoint(corners.topLeft || corners.ul);
+      const topRight = parseLatLngPoint(corners.topRight || corners.ur);
+      const bottomLeft = parseLatLngPoint(corners.bottomLeft || corners.bl);
+      const bottomRight = parseLatLngPoint(corners.bottomRight || corners.br);
+      return topLeft && topRight && bottomLeft ? { topLeft, topRight, bottomLeft, bottomRight } : null;
+    }
+
+    function parseOverlaySize(size) {
+      if (!size || typeof size !== "object") return null;
+      const width = Number(size.width);
+      const height = Number(size.height);
+      return width > 0 && height > 0 ? { width, height } : null;
+    }
+
+    function latLngBoundsFromOverlayCorners(corners) {
+      if (!corners) return null;
+      const points = [corners.topLeft, corners.topRight, corners.bottomLeft, corners.bottomRight].filter(Boolean);
+      return points.length >= 3 ? L.latLngBounds(points) : null;
     }
 
     function ringFromLatLngBounds(bounds) {
@@ -18133,16 +18247,17 @@ function updateExportSegmentedUI() {
       if (exportFloodLayer && exportMap.hasLayer(exportFloodLayer)) {
         exportMap.removeLayer(exportFloodLayer);
       }
-      exportFloodLayer = L.imageOverlay(match.url, floodLatLngBounds, {
+      exportFloodLayer = createFloodImageOverlay(match.url, {
         opacity: overlayOpacity,
         interactive: false,
         crossOrigin: true,
         zIndex: 500,
         pane: "floodPane"
-      }).addTo(exportMap);
+      });
       await new Promise(resolve => {
         exportFloodLayer.once("load", resolve);
         exportFloodLayer.once("error", resolve);
+        exportFloodLayer.addTo(exportMap);
       });
     }
 
@@ -19624,9 +19739,8 @@ function formatSelectedObservedDate(dateStr) {
       }
 
       const previousLayer = currentFloodLayer;
-      const nextLayer = L.imageOverlay(
+      const nextLayer = createFloodImageOverlay(
         overlayUrl,
-        floodLatLngBounds,
         {
           opacity: 0,
           interactive: false,
@@ -30816,6 +30930,16 @@ const TOWN_CONSTANTS = {
       "south": 40.3162360150152,
       "east": -73.9744414349259,
       "north": 40.479106683168
+    },
+    "rasterSize": {
+      "width": 4882,
+      "height": 5909
+    },
+    "rasterCorners": {
+      "topLeft": [40.479106683168, -74.1499412858278],
+      "topRight": [40.4784419056546, -73.9744414349259],
+      "bottomLeft": [40.3168970150891, -74.150780395207],
+      "bottomRight": [40.3162360150152, -73.9757011876204]
     },
     "depthRoots": [
       "https://floodmapperv1.b-cdn.net/DepthPNGs/MiddletownTownship/"
