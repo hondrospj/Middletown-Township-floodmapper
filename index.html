@@ -30098,6 +30098,8 @@ html.platform-mac-template .export-simple-datetime-field input[type="datetime-lo
       setImportant(legend, "bottom", "auto");
       if (body.classList.contains("mobile-legend-open")) {
         setImportant(legend, "top", "calc(var(--shorely-compact-top-row, 52px) + 38px + env(safe-area-inset-top, 0px))");
+        setImportant(legend, "left", "50%");
+        setImportant(legend, "transform", "translateX(-50%)");
         setImportant(legend, "width", "min(270px, calc(100vw - 16px - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px)))");
         setImportant(legend, "height", "auto");
         setImportant(legend, "min-height", "0");
@@ -30106,6 +30108,8 @@ html.platform-mac-template .export-simple-datetime-field input[type="datetime-lo
         setImportant(legend, "overflow-x", "hidden");
       } else {
         setImportant(legend, "top", "calc(var(--shorely-compact-top-row, 52px) + env(safe-area-inset-top, 0px))");
+        setImportant(legend, "left", "calc(8px + env(safe-area-inset-left, 0px))");
+        setImportant(legend, "transform", "none");
         setImportant(legend, "width", window.innerWidth <= 360 ? "82px" : "88px");
         setImportant(legend, "height", "32px");
         setImportant(legend, "min-height", "32px");
@@ -30141,7 +30145,7 @@ html.platform-mac-template .export-simple-datetime-field input[type="datetime-lo
       setImportant(mobileRailMount, "display", "flex");
       setImportant(mobileRailMount, "flex-direction", "column");
       setImportant(mobileRailMount, "gap", "7px");
-      setImportant(mobileRailMount, "order", "120");
+      setImportant(mobileRailMount, "order", "999");
       setImportant(mobileRailMount, "width", "100%");
       setImportant(mobileRailMount, "margin", "0");
       setImportant(mobileRailMount, "padding", "0");
@@ -30153,7 +30157,7 @@ html.platform-mac-template .export-simple-datetime-field input[type="datetime-lo
       setImportant(downloadCard, "display", "block");
       setImportant(downloadCard, "visibility", "visible");
       setImportant(downloadCard, "opacity", "1");
-      setImportant(downloadCard, "order", "100");
+      setImportant(downloadCard, "order", "20");
     }
 
     if (closeBtn) {
@@ -30400,10 +30404,35 @@ html.platform-mac-template .export-simple-datetime-field input[type="datetime-lo
 
   html body.mobile-optimized #mobileControlsToggle::after{
     content:"Controls ▾" !important;
+    display:flex !important;
+    align-items:center !important;
+    justify-content:center !important;
+    width:100% !important;
+    height:100% !important;
+    padding:0 9px !important;
+    color:#fff !important;
+    font-size:11px !important;
+    font-weight:950 !important;
+    line-height:1 !important;
+    letter-spacing:0 !important;
+    white-space:nowrap !important;
+    overflow:hidden !important;
+    text-overflow:clip !important;
+    box-sizing:border-box !important;
   }
 
   html body.mobile-optimized.mobile-controls-open #mobileControlsToggle::after{
     content:"Controls ▴" !important;
+    color:#fff !important;
+    opacity:1 !important;
+    visibility:visible !important;
+  }
+
+  html body.mobile-optimized #mobileControlsToggle:active::after,
+  html body.mobile-optimized #mobileControlsToggle:focus-visible::after{
+    color:#fff !important;
+    opacity:1 !important;
+    visibility:visible !important;
   }
 
   html body.mobile-optimized #leftPanel > #mobileControlsClose,
@@ -30419,6 +30448,21 @@ html.platform-mac-template .export-simple-datetime-field input[type="datetime-lo
 
   html body.mobile-optimized:not(.mobile-legend-open) #legendDock::after{
     content:attr(data-compact-legend-label) " ▾" !important;
+    display:flex !important;
+    align-items:center !important;
+    justify-content:center !important;
+    width:100% !important;
+    height:100% !important;
+    padding:0 8px !important;
+    color:#fff !important;
+    font-size:11px !important;
+    font-weight:950 !important;
+    line-height:1 !important;
+    letter-spacing:0 !important;
+    white-space:nowrap !important;
+    overflow:hidden !important;
+    text-overflow:clip !important;
+    box-sizing:border-box !important;
   }
 
   html body.mobile-optimized #legendDock,
@@ -30441,6 +30485,9 @@ html.platform-mac-template .export-simple-datetime-field input[type="datetime-lo
   html body.mobile-optimized.mobile-legend-open #legendDock,
   html body.mobile-optimized.mobile-legend-open #legendDock.legend-card{
     top:calc(var(--shorely-compact-top-row) + 38px + env(safe-area-inset-top, 0px)) !important;
+    left:50% !important;
+    right:auto !important;
+    transform:translateX(-50%) !important;
     width:min(270px, calc(100vw - 16px - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px))) !important;
     min-width:0 !important;
     max-width:calc(100vw - 16px - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px)) !important;
@@ -30456,7 +30503,7 @@ html.platform-mac-template .export-simple-datetime-field input[type="datetime-lo
     position:static !important;
     display:flex !important;
     align-items:center !important;
-    justify-content:flex-start !important;
+    justify-content:center !important;
     width:auto !important;
     height:auto !important;
     min-height:0 !important;
@@ -30539,7 +30586,7 @@ html.platform-mac-template .export-simple-datetime-field input[type="datetime-lo
     display:flex !important;
     flex-direction:column !important;
     gap:7px !important;
-    order:120 !important;
+    order:999 !important;
     width:100% !important;
     margin:0 !important;
     padding:0 !important;
@@ -30552,8 +30599,23 @@ html.platform-mac-template .export-simple-datetime-field input[type="datetime-lo
     margin-right:0 !important;
   }
 
-  html body.mobile-optimized #mobileRailMount > .layers-card{ order:10 !important; }
-  html body.mobile-optimized #mobileRailMount > .top-tides-card{ order:20 !important; }
+  html body.mobile-optimized #leftPanel > #legendDock,
+  html body.mobile-optimized #leftPanel > .mobile-top-tides-card,
+  html body.mobile-optimized #mobileRailMount > .right-logo-card,
+  html body.mobile-optimized #mobileRailMount > .layers-card{
+    display:none !important;
+    visibility:hidden !important;
+    opacity:0 !important;
+    pointer-events:none !important;
+  }
+
+  html body.mobile-optimized #mobileRailMount > .top-tides-card{
+    display:block !important;
+    visibility:visible !important;
+    opacity:1 !important;
+    pointer-events:auto !important;
+    order:10 !important;
+  }
 
   html body.mobile-optimized #mobileRailMount > #downloadCard,
   html body.mobile-optimized #mobileRailMount > .download-card,
@@ -30561,12 +30623,17 @@ html.platform-mac-template .export-simple-datetime-field input[type="datetime-lo
     display:block !important;
     visibility:visible !important;
     opacity:1 !important;
-    order:100 !important;
+    pointer-events:auto !important;
+    order:20 !important;
   }
 
   html body.mobile-optimized #mobileRailMount > #townAddressCard,
   html body.mobile-optimized #mobileRailMount > .town-address-card{
-    order:90 !important;
+    display:block !important;
+    visibility:visible !important;
+    opacity:1 !important;
+    pointer-events:auto !important;
+    order:30 !important;
   }
 
   html body.mobile-optimized #timelineDock .playFab,
