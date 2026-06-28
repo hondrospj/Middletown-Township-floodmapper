@@ -14297,6 +14297,7 @@ html.win-compact-ui #timelineDock #hourSlider{
     let DATUM_OFFSETS = { navd88: 0, mllw: 0 };
     let FALLBACK_TOWN_MASK_RING = [];
     let FALLBACK_LATLNG_BOUNDS = null;
+    let CONFIGURED_OVERLAY_LATLNG_BOUNDS = null;
     let MUNICIPAL_BOUNDARY_BUNNY_URL = "";
     let MINOR_FLOOD_FT = 0;
     let MODERATE_FLOOD_FT = 0;
@@ -14444,6 +14445,7 @@ html.win-compact-ui #timelineDock #hourSlider{
       MUNICIPAL_BOUNDARY_BUNNY_URL = config.boundary?.bunnyBoundaryPath || config.boundary?.boundaryUrl || "";
       FALLBACK_TOWN_MASK_RING = [];
       FALLBACK_LATLNG_BOUNDS = null;
+      CONFIGURED_OVERLAY_LATLNG_BOUNDS = latLngBoundsFromBoundsObject(config.overlays?.rasterBounds || config.overlays?.overlayBounds);
 
       MINOR_FLOOD_FT = Number(config.thresholds?.navd88?.minor || 0);
       MODERATE_FLOOD_FT = Number(config.thresholds?.navd88?.moderate || 0);
@@ -15495,13 +15497,16 @@ function setDatumHelpOpen(isOpen) {
     }
 
     async function ensureOverlayBounds(sampleOverlayUrl) {
-      const boundaryBounds = getBoundaryDrivenOverlayBounds();
-      floodLatLngBounds = boundaryBounds;
+      const configuredBounds = CONFIGURED_OVERLAY_LATLNG_BOUNDS;
+      const overlayBounds = configuredBounds && configuredBounds.isValid && configuredBounds.isValid()
+        ? configuredBounds
+        : getBoundaryDrivenOverlayBounds();
+      floodLatLngBounds = overlayBounds;
 
       return {
         url: sampleOverlayUrl || null,
-        mode: "boundary-driven",
-        bounds: boundaryBounds
+        mode: configuredBounds ? "configured-raster-bounds" : "boundary-driven",
+        bounds: overlayBounds
       };
     }
 
@@ -30806,6 +30811,12 @@ const TOWN_CONSTANTS = {
   "overlays": {
     "depthPngPrefix": "MiddletownTownshipDepth",
     "stagePngPrefix": "MiddletownTownshipStage",
+    "rasterBounds": {
+      "west": -74.150780395207,
+      "south": 40.3162360150152,
+      "east": -73.9744414349259,
+      "north": 40.479106683168
+    },
     "depthRoots": [
       "https://floodmapperv1.b-cdn.net/DepthPNGs/MiddletownTownship/"
     ],
