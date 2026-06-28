@@ -30146,9 +30146,14 @@ html.platform-mac-template .export-simple-datetime-field input[type="datetime-lo
       setImportant(mobileRailMount, "flex-direction", "column");
       setImportant(mobileRailMount, "gap", "7px");
       setImportant(mobileRailMount, "order", "999");
+      setImportant(mobileRailMount, "flex", "0 0 auto");
+      setImportant(mobileRailMount, "align-self", "stretch");
       setImportant(mobileRailMount, "width", "100%");
+      setImportant(mobileRailMount, "height", "auto");
+      setImportant(mobileRailMount, "max-height", "none");
       setImportant(mobileRailMount, "margin", "0");
       setImportant(mobileRailMount, "padding", "0");
+      setImportant(mobileRailMount, "overflow", "visible");
     }
     if (downloadCard && mobileRailMount && downloadCard.parentNode !== mobileRailMount) {
       mobileRailMount.appendChild(downloadCard);
@@ -30587,14 +30592,20 @@ html.platform-mac-template .export-simple-datetime-field input[type="datetime-lo
     flex-direction:column !important;
     gap:7px !important;
     order:999 !important;
+    flex:0 0 auto !important;
+    align-self:stretch !important;
     width:100% !important;
+    height:auto !important;
+    max-height:none !important;
     margin:0 !important;
     padding:0 !important;
+    overflow:visible !important;
   }
 
   html body.mobile-optimized #mobileRailMount > *{
     width:100% !important;
     max-width:100% !important;
+    flex:0 0 auto !important;
     margin-left:0 !important;
     margin-right:0 !important;
   }
