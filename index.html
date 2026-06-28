@@ -30053,12 +30053,30 @@ html.platform-mac-template .export-simple-datetime-field input[type="datetime-lo
     var mobileRailMount = document.getElementById("mobileRailMount");
     var downloadCard = document.getElementById("downloadCard");
     var closeBtn = document.getElementById("mobileControlsClose");
+    var rotateNotice = document.getElementById("shorelyRotateNotice");
 
     if (!mobile) {
       body.classList.remove("shorely-compact-mobile-ui");
+      body.classList.remove("shorely-phone-landscape");
       return;
     }
     body.classList.add("shorely-compact-mobile-ui");
+
+    if (!rotateNotice) {
+      rotateNotice = document.createElement("div");
+      rotateNotice.id = "shorelyRotateNotice";
+      rotateNotice.setAttribute("role", "status");
+      rotateNotice.setAttribute("aria-live", "polite");
+      rotateNotice.innerHTML = '<div class="shorely-rotate-dialog">Please keep phone vertical</div>';
+      document.body.appendChild(rotateNotice);
+    }
+    var landscapePhone = false;
+    try {
+      landscapePhone = window.matchMedia("(orientation: landscape) and (max-height: 560px) and (pointer: coarse)").matches;
+    } catch (e) {
+      landscapePhone = (window.innerWidth || 0) > (window.innerHeight || 0) && (window.innerHeight || 0) <= 560 && "ontouchstart" in window;
+    }
+    body.classList.toggle("shorely-phone-landscape", landscapePhone);
 
     root.style.setProperty("--shorely-mobile-timeline-height", "86px");
     root.style.setProperty("--pj-request-timeline-height", "86px");
@@ -30080,10 +30098,10 @@ html.platform-mac-template .export-simple-datetime-field input[type="datetime-lo
       setImportant(legend, "bottom", "auto");
       if (body.classList.contains("mobile-legend-open")) {
         setImportant(legend, "top", "calc(var(--shorely-compact-top-row, 52px) + 38px + env(safe-area-inset-top, 0px))");
-        setImportant(legend, "width", "min(292px, calc(100vw - 16px - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px)))");
+        setImportant(legend, "width", "min(270px, calc(100vw - 16px - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px)))");
         setImportant(legend, "height", "auto");
         setImportant(legend, "min-height", "0");
-        setImportant(legend, "max-height", "min(30dvh, 154px)");
+        setImportant(legend, "max-height", "min(32dvh, 164px)");
         setImportant(legend, "overflow-y", "auto");
         setImportant(legend, "overflow-x", "hidden");
       } else {
@@ -30119,6 +30137,15 @@ html.platform-mac-template .export-simple-datetime-field input[type="datetime-lo
       setImportant(toggle, "will-change", "auto");
     }
 
+    if (mobileRailMount) {
+      setImportant(mobileRailMount, "display", "flex");
+      setImportant(mobileRailMount, "flex-direction", "column");
+      setImportant(mobileRailMount, "gap", "7px");
+      setImportant(mobileRailMount, "order", "120");
+      setImportant(mobileRailMount, "width", "100%");
+      setImportant(mobileRailMount, "margin", "0");
+      setImportant(mobileRailMount, "padding", "0");
+    }
     if (downloadCard && mobileRailMount && downloadCard.parentNode !== mobileRailMount) {
       mobileRailMount.appendChild(downloadCard);
     }
@@ -30177,13 +30204,13 @@ html.platform-mac-template .export-simple-datetime-field input[type="datetime-lo
     }
 
     if (play) {
-      setImportant(play, "width", "34px");
-      setImportant(play, "min-width", "34px");
-      setImportant(play, "max-width", "34px");
-      setImportant(play, "height", "34px");
-      setImportant(play, "min-height", "34px");
-      setImportant(play, "max-height", "34px");
-      setImportant(play, "flex", "0 0 34px");
+      setImportant(play, "width", "38px");
+      setImportant(play, "min-width", "38px");
+      setImportant(play, "max-width", "38px");
+      setImportant(play, "height", "38px");
+      setImportant(play, "min-height", "38px");
+      setImportant(play, "max-height", "38px");
+      setImportant(play, "flex", "0 0 38px");
       setImportant(play, "padding", "0");
       setImportant(play, "overflow", "hidden");
     }
@@ -30192,16 +30219,16 @@ html.platform-mac-template .export-simple-datetime-field input[type="datetime-lo
       setImportant(days, "height", "20px");
       setImportant(days, "min-height", "20px");
       setImportant(days, "max-height", "20px");
-      setImportant(days, "width", "calc(100% - 48px)");
-      setImportant(days, "max-width", "calc(100% - 48px)");
-      setImportant(days, "margin", "0 0 6px 48px");
+      setImportant(days, "width", "calc(100% - 54px)");
+      setImportant(days, "max-width", "calc(100% - 54px)");
+      setImportant(days, "margin", "0 0 6px 54px");
       setImportant(days, "overflow", "hidden");
     }
 
     if (track) {
       setImportant(track, "height", "24px");
       setImportant(track, "min-height", "24px");
-      setImportant(track, "margin-left", "48px");
+      setImportant(track, "margin-left", "54px");
       setImportant(track, "margin-top", "6px");
     }
 
@@ -30414,12 +30441,12 @@ html.platform-mac-template .export-simple-datetime-field input[type="datetime-lo
   html body.mobile-optimized.mobile-legend-open #legendDock,
   html body.mobile-optimized.mobile-legend-open #legendDock.legend-card{
     top:calc(var(--shorely-compact-top-row) + 38px + env(safe-area-inset-top, 0px)) !important;
-    width:min(292px, calc(100vw - 16px - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px))) !important;
+    width:min(270px, calc(100vw - 16px - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px))) !important;
     min-width:0 !important;
     max-width:calc(100vw - 16px - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px)) !important;
-    max-height:min(30dvh, 154px) !important;
-    padding:6px 7px 7px !important;
-    border-radius:13px !important;
+    max-height:min(32dvh, 164px) !important;
+    padding:6px 8px 7px !important;
+    border-radius:12px !important;
     overflow-y:auto !important;
     overflow-x:hidden !important;
   }
@@ -30431,16 +30458,18 @@ html.platform-mac-template .export-simple-datetime-field input[type="datetime-lo
     align-items:center !important;
     justify-content:flex-start !important;
     width:auto !important;
-    height:15px !important;
+    height:auto !important;
     min-height:0 !important;
-    margin:0 0 4px !important;
+    margin:0 0 5px !important;
     padding:0 !important;
     color:#fff !important;
-    font-size:9.5px !important;
+    font-size:10px !important;
     font-weight:950 !important;
-    line-height:1 !important;
+    line-height:1.05 !important;
     letter-spacing:0 !important;
     background:none !important;
+    border:0 !important;
+    outline:0 !important;
     box-shadow:none !important;
     transform:none !important;
   }
@@ -30471,8 +30500,8 @@ html.platform-mac-template .export-simple-datetime-field input[type="datetime-lo
     display:grid !important;
     visibility:visible !important;
     opacity:1 !important;
-    grid-template-columns:repeat(auto-fit, minmax(74px, 1fr)) !important;
-    gap:4px 7px !important;
+    grid-template-columns:repeat(2, minmax(0, 1fr)) !important;
+    gap:5px 8px !important;
   }
 
   html body.mobile-optimized.mobile-legend-open #legendDock .legend-row,
@@ -30480,27 +30509,51 @@ html.platform-mac-template .export-simple-datetime-field input[type="datetime-lo
     display:grid !important;
     visibility:visible !important;
     opacity:1 !important;
-    grid-template-columns:8px minmax(0, 1fr) !important;
+    grid-template-columns:9px minmax(0, 1fr) !important;
     gap:4px !important;
     align-items:center !important;
-    min-height:13px !important;
-    font-size:8.8px !important;
+    min-height:14px !important;
+    font-size:9px !important;
     line-height:1.05 !important;
     white-space:nowrap !important;
-    overflow:hidden !important;
+    overflow:visible !important;
   }
 
   html body.mobile-optimized.mobile-legend-open #legendDock .legend-label{
     min-width:0 !important;
-    overflow:hidden !important;
+    overflow:visible !important;
     text-overflow:clip !important;
+    white-space:nowrap !important;
+    font-size:9px !important;
+    line-height:1.05 !important;
   }
 
   html body.mobile-optimized.mobile-legend-open #legendDock .legend-swatch{
-    width:8px !important;
-    height:8px !important;
+    width:9px !important;
+    height:9px !important;
     border-radius:2px !important;
   }
+
+  html body.mobile-optimized #mobileRailMount,
+  html body.mobile-optimized #leftPanel > #mobileRailMount{
+    display:flex !important;
+    flex-direction:column !important;
+    gap:7px !important;
+    order:120 !important;
+    width:100% !important;
+    margin:0 !important;
+    padding:0 !important;
+  }
+
+  html body.mobile-optimized #mobileRailMount > *{
+    width:100% !important;
+    max-width:100% !important;
+    margin-left:0 !important;
+    margin-right:0 !important;
+  }
+
+  html body.mobile-optimized #mobileRailMount > .layers-card{ order:10 !important; }
+  html body.mobile-optimized #mobileRailMount > .top-tides-card{ order:20 !important; }
 
   html body.mobile-optimized #mobileRailMount > #downloadCard,
   html body.mobile-optimized #mobileRailMount > .download-card,
@@ -30514,6 +30567,85 @@ html.platform-mac-template .export-simple-datetime-field input[type="datetime-lo
   html body.mobile-optimized #mobileRailMount > #townAddressCard,
   html body.mobile-optimized #mobileRailMount > .town-address-card{
     order:90 !important;
+  }
+
+  html body.mobile-optimized #timelineDock .playFab,
+  html body.mobile-optimized #timelineDock #playBtn{
+    width:38px !important;
+    min-width:38px !important;
+    max-width:38px !important;
+    height:38px !important;
+    min-height:38px !important;
+    max-height:38px !important;
+    flex:0 0 38px !important;
+  }
+
+  html body.mobile-optimized #timelineDock .playTriangle{
+    border-top-width:8px !important;
+    border-bottom-width:8px !important;
+    border-left-width:12px !important;
+    margin-left:3px !important;
+  }
+
+  html body.mobile-optimized #timelineDock #playBtn .pauseIcon{
+    width:17px !important;
+    height:17px !important;
+  }
+
+  html body.mobile-optimized #timelineDock #playBtn .pauseIcon::before,
+  html body.mobile-optimized #timelineDock #playBtn .pauseIcon::after{
+    width:5px !important;
+    height:17px !important;
+    border-radius:2px !important;
+  }
+
+  html body.mobile-optimized #timelineDock #playBtn .pauseIcon::before{ left:2px !important; }
+  html body.mobile-optimized #timelineDock #playBtn .pauseIcon::after{ right:2px !important; }
+
+  html body.mobile-optimized #timelineDayTabs{
+    width:calc(100% - 54px) !important;
+    max-width:calc(100% - 54px) !important;
+    margin-left:54px !important;
+  }
+
+  html body.mobile-optimized #timelineDock .timeline-trackRow{
+    margin-left:54px !important;
+  }
+
+  html body.mobile-optimized #shorelyRotateNotice{
+    display:none !important;
+    position:fixed !important;
+    inset:0 !important;
+    z-index:20000 !important;
+    align-items:center !important;
+    justify-content:center !important;
+    padding:24px !important;
+    background:rgba(7, 12, 22, .72) !important;
+    -webkit-backdrop-filter:blur(7px) !important;
+    backdrop-filter:blur(7px) !important;
+  }
+
+  html body.mobile-optimized.shorely-phone-landscape #shorelyRotateNotice{
+    display:flex !important;
+  }
+
+  html body.mobile-optimized #shorelyRotateNotice .shorely-rotate-dialog{
+    display:flex !important;
+    align-items:center !important;
+    justify-content:center !important;
+    width:min(280px, calc(100vw - 48px)) !important;
+    min-height:78px !important;
+    padding:18px 20px !important;
+    border:1px solid rgba(218, 230, 255, .28) !important;
+    border-radius:16px !important;
+    background:rgba(12, 19, 32, .94) !important;
+    color:#fff !important;
+    text-align:center !important;
+    font-size:18px !important;
+    font-weight:900 !important;
+    line-height:1.15 !important;
+    letter-spacing:0 !important;
+    box-shadow:0 18px 44px rgba(0, 0, 0, .36) !important;
   }
 }
 </style>
