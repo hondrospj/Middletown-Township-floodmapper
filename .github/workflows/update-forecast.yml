@@ -1,4 +1,4 @@
-name: Update Highlands Borough forecast
+name: Update Middletown Township forecast
 
 on:
   schedule:
@@ -31,14 +31,14 @@ jobs:
           from datetime import datetime, timedelta, timezone
           from pathlib import Path
 
-          TOWN_NAME = "Highlands Borough"
+          TOWN_NAME = "Middletown Township"
           IS_SPLIT = False
           DEFAULT_ZONE_ID = "default"
           ZONES = [
             {
               "id": "default",
-              "zoneName": "Highlands Borough",
-              "label": "Highlands Borough",
+              "zoneName": "Middletown Township",
+              "label": "Middletown Township",
               "gaugeName": "Sea Bright",
               "petssGaugeId": "8531804",
               "usgsGaugeId": "01407600",
