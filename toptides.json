@@ -1,9 +1,14 @@
 {
   "toptides": [
     {
-      "height_ft": "",
-      "date": "",
-      "display_date": ""
+      "height_ft": 10.411,
+      "date": "2012-10-29",
+      "display_date": "Hurricane Sandy (Oct. 29, 2012)",
+      "source_station": "Sandy Hook",
+      "source_station_id": "8531680",
+      "source_peak_mllw_ft": 13.231,
+      "source_peak_time_local": "2012-10-29 19:36",
+      "navd88_conversion_note": "NOAA Sandy Hook water_level peak in MLLW converted to NAVD88 using NOAA station datums: 13.231 + 2.51 - 5.33 = 10.411 ft NAVD88."
     },
     {
       "height_ft": "",
