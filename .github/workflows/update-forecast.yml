@@ -15,7 +15,8 @@ concurrency:
   group: middletown-township-floodmapper-data-updates-v2
   cancel-in-progress: false
 
-jobs:  update-forecast:
+jobs:
+  update-forecast:
     runs-on: ubuntu-latest
     timeout-minutes: 15
 
@@ -337,7 +338,7 @@ jobs:  update-forecast:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add forecast.json
-          git diff --staged --quiet || git commit -m "Update Highlands Borough forecast"
+          git diff --staged --quiet || git commit -m "Update Middletown Township forecast"
           for attempt in 1 2 3 4 5; do
             git pull --rebase --autostash origin main
             if git push; then
