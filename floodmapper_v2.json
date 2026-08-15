@@ -1,0 +1,106 @@
+{
+  "schema": "nj-floodmapper-v2-config",
+  "repo": "Middletown-Township-floodmapper",
+  "releaseVersion": "20260815-v2-statewide",
+  "site": {
+    "name": "Middletown Township",
+    "municipalityName": "Middletown Township",
+    "county": "MONMOUTH",
+    "usgsGaugeId": "01407600",
+    "noaaGaugeId": "8531804",
+    "petssGaugeId": "8531804",
+    "gaugeName": "Sea Bright"
+  },
+  "observed": {
+    "usgsGaugeId": "01407600",
+    "usgsParameterCd": "72279",
+    "primaryArchiveStartDate": "2007-10-01",
+    "sourcePrecedence": [
+      "primary-usgs-continuous",
+      "noaa-sandy-hook-historical-fill",
+      "official-usgs-storm-tide-crest-override"
+    ],
+    "surrogate": {
+      "enabled": true,
+      "key": "sandy-hook",
+      "stationId": "8531680",
+      "stationName": "Sandy Hook, New Jersey",
+      "stationShort": "Sandy Hook",
+      "hostRepo": "Sea-Bright-Borough-floodmapper",
+      "indexPath": "surrogate_archive_index.json",
+      "hourlyPath": "surrogate_hourly.json",
+      "shardPath": "observed_archive/sandy-hook/{year}.json",
+      "archiveStartDate": "1932-01-01",
+      "archiveEndDate": "2016-08-18",
+      "indexUrl": "https://hondrospj.github.io/Sea-Bright-Borough-floodmapper/surrogate_archive_index.json",
+      "hourlyUrl": "https://hondrospj.github.io/Sea-Bright-Borough-floodmapper/surrogate_hourly.json",
+      "shardPathTemplate": "https://hondrospj.github.io/Sea-Bright-Borough-floodmapper/observed_archive/sandy-hook/{year}.json"
+    }
+  },
+  "thresholds": {
+    "navd88": {
+      "minor": 3.07,
+      "moderate": 4.07,
+      "major": 5.07
+    },
+    "mllw": {
+      "minor": 5.2,
+      "moderate": 6.2,
+      "major": 7.2
+    }
+  },
+  "datums": {
+    "helpText": "Changing the reference changes the number shown, not the mapped flood area.",
+    "navd88OffsetFromMllwFt": -2.13,
+    "offsets": {
+      "navd88": 0,
+      "mllw": 2.13
+    }
+  },
+  "terrain": {
+    "schema": "nj-floodmapper-lidar-provenance-v2",
+    "municipality": "Middletown Township",
+    "county": "MONMOUTH",
+    "sourceService": "USGS 3DEP Bare Earth DEM Dynamic ImageServer",
+    "sourceServiceUrl": "https://elevation.nationalmap.gov/arcgis/rest/services/3DEPElevation/ImageServer",
+    "lidar": {
+      "project": "NJ Northeast Six County LiDAR",
+      "projectId": "NJ_NE6County_B23",
+      "acquisitionYear": 2023,
+      "qualityLevel": "USGS QL2",
+      "nativeResolutionMeters": 1
+    },
+    "acquisitionAgeYearsAtRelease": 3,
+    "processing": {
+      "requestedIntermediateResolutionFeet": 1,
+      "requestedIntermediateResolutionMeters": 0.3048,
+      "sourceServiceInterpolation": "cubic convolution",
+      "browserCatalogResolutionFeet": 5,
+      "browserCatalogResolutionMeters": 1.524,
+      "browserResampling": "cubic spline from one-foot intermediate tiles",
+      "reason": "The one-foot intermediate retains road crowns, curbs, channels, and narrow barriers before the five-foot web catalog is produced; upsampling does not create detail beyond the native LiDAR.",
+      "verticalDatum": "NAVD88",
+      "outputVerticalUnits": "feet"
+    },
+    "boundsWgs84": {
+      "south": 40.3168218094403,
+      "west": -74.1504926688826,
+      "north": 40.4785595089691,
+      "east": -73.9750364339982
+    },
+    "boundaryPath": "Boundaries/Middletown Township.geojson",
+    "catalog": {
+      "townFolder": "Middletown Township",
+      "prefix": "MiddletownTownship",
+      "thresholdsNavd88Ft": {
+        "minor": 3.07,
+        "moderate": 4.07,
+        "major": 5.07
+      },
+      "stageMinimumFt": 0,
+      "stageMaximumFt": 20,
+      "stageStepFt": 0.1
+    },
+    "releaseVersion": "20260815-v2-statewide"
+  }
+}

@@ -1,0 +1,46 @@
+{
+  "schema": "nj-floodmapper-lidar-provenance-v2",
+  "municipality": "Middletown Township",
+  "county": "MONMOUTH",
+  "sourceService": "USGS 3DEP Bare Earth DEM Dynamic ImageServer",
+  "sourceServiceUrl": "https://elevation.nationalmap.gov/arcgis/rest/services/3DEPElevation/ImageServer",
+  "lidar": {
+    "project": "NJ Northeast Six County LiDAR",
+    "projectId": "NJ_NE6County_B23",
+    "acquisitionYear": 2023,
+    "qualityLevel": "USGS QL2",
+    "nativeResolutionMeters": 1
+  },
+  "acquisitionAgeYearsAtRelease": 3,
+  "processing": {
+    "requestedIntermediateResolutionFeet": 1,
+    "requestedIntermediateResolutionMeters": 0.3048,
+    "sourceServiceInterpolation": "cubic convolution",
+    "browserCatalogResolutionFeet": 5,
+    "browserCatalogResolutionMeters": 1.524,
+    "browserResampling": "cubic spline from one-foot intermediate tiles",
+    "reason": "The one-foot intermediate retains road crowns, curbs, channels, and narrow barriers before the five-foot web catalog is produced; upsampling does not create detail beyond the native LiDAR.",
+    "verticalDatum": "NAVD88",
+    "outputVerticalUnits": "feet"
+  },
+  "boundsWgs84": {
+    "south": 40.3168218094403,
+    "west": -74.1504926688826,
+    "north": 40.4785595089691,
+    "east": -73.9750364339982
+  },
+  "boundaryPath": "Boundaries/Middletown Township.geojson",
+  "catalog": {
+    "townFolder": "Middletown Township",
+    "prefix": "MiddletownTownship",
+    "thresholdsNavd88Ft": {
+      "minor": 3.07,
+      "moderate": 4.07,
+      "major": 5.07
+    },
+    "stageMinimumFt": 0,
+    "stageMaximumFt": 20,
+    "stageStepFt": 0.1
+  },
+  "releaseVersion": "20260815-v2-statewide"
+}
