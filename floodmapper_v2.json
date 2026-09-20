@@ -59,5 +59,29 @@
     }
   },
   "terrain": null,
-  "pipelineFile": "gauge_pipeline_v2.json"
+  "pipelineFile": "gauge_pipeline_v2.json",
+  "overlays": {
+    "depthPngPrefix": "MiddletownTownshipDepth",
+    "stagePngPrefix": "MiddletownTownshipStage",
+    "depthRoots": [
+      "./assets/connected-v2/DepthPNGs/Middletown%20Township/",
+      "https://floodmapperv1.b-cdn.net/DepthPNGs/Middletown%20Township/"
+    ],
+    "dynamicRoots": [
+      "./assets/connected-v2/StagePNGs/Middletown%20Township/",
+      "https://floodmapperv1.b-cdn.net/StagePNGs/Middletown%20Township/"
+    ],
+    "boundsWgs84": {
+      "south": 40.3168218094403,
+      "west": -74.1504926688826,
+      "north": 40.4785595089691,
+      "east": -73.9750364339982
+    },
+    "cacheVersions": {
+      "depth": "20260815-v2-statewide",
+      "dynamic": "20260815-v2-statewide",
+      "hydraulic": "20260815-v2-statewide"
+    },
+    "depthQueryPngPath": "./assets/connected-v2/COGs/Middletown%20Township/MiddletownTownshipHydraulicQuery5ft.png?v=20260815-v2-statewide"
+  }
 }
