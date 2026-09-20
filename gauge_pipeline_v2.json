@@ -1,0 +1,97 @@
+{
+  "schema": "nj-floodmapper-gauge-pipeline-v2",
+  "releaseVersion": "20260920-nj-universal-v2",
+  "town": "Middletown Township",
+  "repo": "Middletown-Township-floodmapper",
+  "sourcePrecedence": [
+    "primary-usgs-continuous",
+    "bias-corrected-noaa-historical-fill",
+    "official-usgs-storm-tide-crest-override"
+  ],
+  "primaryUsgs": {
+    "stationId": "01407600",
+    "stationName": "Sea Bright"
+  },
+  "noaaHistoricalFill": {
+    "stationId": "8531680",
+    "stationName": "Sandy Hook, New Jersey",
+    "region": "sandy-hook",
+    "biasCorrectionFt": -0.488,
+    "correctionApplication": "corrected NOAA NAVD88 = raw NOAA NAVD88 + biasCorrectionFt"
+  },
+  "officialUsgsCrestTruth": {
+    "stationId": "01407590",
+    "stationName": "Branchport Creek at Oceanport NJ"
+  },
+  "calibration": {
+    "schema": "noaa-to-usgs-daily-high-offset-v2",
+    "pairKey": "01407600:sandy-hook",
+    "primaryUsgsGaugeId": "01407600",
+    "noaaRegion": "sandy-hook",
+    "noaaStationId": "8531680",
+    "noaaStationName": "Sandy Hook, New Jersey",
+    "method": "constant robust vertical offset = median(USGS local-day peak NAVD88 - NOAA verified hourly local-day peak NAVD88), fit on complete calendar years 2021-2025; 3-IQR difference screen; leave-one-year-out validation",
+    "application": "correctedNoaaNavd88Ft = rawNoaaNavd88Ft + offsetFt",
+    "overlap": {
+      "startDate": "2021-01-01",
+      "endDate": "2025-12-31",
+      "rawDays": 1826,
+      "acceptedDays": 1822,
+      "excludedDays": 4
+    },
+    "offsetFt": -0.488,
+    "validation": {
+      "medianResidualFt": 0,
+      "maeFt": 0.1735,
+      "rmseFt": 0.2209,
+      "folds": [
+        {
+          "year": 2021,
+          "samples": 365,
+          "trainingOffsetFt": -0.487,
+          "medianBiasFt": -0.004,
+          "maeFt": 0.1826,
+          "rmseFt": 0.235
+        },
+        {
+          "year": 2022,
+          "samples": 365,
+          "trainingOffsetFt": -0.486,
+          "medianBiasFt": -0.011,
+          "maeFt": 0.1759,
+          "rmseFt": 0.2189
+        },
+        {
+          "year": 2023,
+          "samples": 365,
+          "trainingOffsetFt": -0.494,
+          "medianBiasFt": 0.036,
+          "maeFt": 0.1636,
+          "rmseFt": 0.2063
+        },
+        {
+          "year": 2024,
+          "samples": 365,
+          "trainingOffsetFt": -0.491,
+          "medianBiasFt": 0.024,
+          "maeFt": 0.168,
+          "rmseFt": 0.2103
+        },
+        {
+          "year": 2025,
+          "samples": 362,
+          "trainingOffsetFt": -0.474,
+          "medianBiasFt": -0.0395,
+          "maeFt": 0.1812,
+          "rmseFt": 0.236
+        }
+      ]
+    },
+    "provenance": {
+      "usgsArchive": "../../2026-08-10/gene/work/gauge-archives/01407600.json",
+      "noaaArchive": "work/data/noaa-overlap/sandy-hook.json",
+      "usgsSource": "https://waterdata.usgs.gov/monitoring-location/USGS-01407600/",
+      "noaaSource": "https://tidesandcurrents.noaa.gov/stationhome.html?id=8531680"
+    }
+  }
+}
