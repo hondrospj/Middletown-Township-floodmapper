@@ -18102,8 +18102,10 @@ function setDatumHelpOpen(isOpen) {
     function stageToCode(stageValue) {
       const n = Number(stageValue);
       const sign = n < 0 ? "m" : "p";
-      const hundredths = Math.round(Math.abs(n) * 100);
-      return `${sign}${String(hundredths).padStart(4, "0")}`;
+      const scale = Number(TOWN_CONFIG?.overlays?.stageCodeScale) || 10;
+      const width = Number(TOWN_CONFIG?.overlays?.stageCodeWidth) || (scale >= 100 ? 4 : 3);
+      const units = Math.round(Math.abs(n) * scale);
+      return `${sign}${String(units).padStart(width, "0")}`;
     }
 
     function normalizeHydraulicPhase(value) {
@@ -36521,7 +36523,9 @@ TOWN_CONFIG = {
       "dynamic": "20260815-v2-statewide",
       "hydraulic": "20260815-v2-statewide"
     },
-    "depthQueryPngPath": "./assets/connected-v2/COGs/Middletown%20Township/MiddletownTownshipHydraulicQuery5ft.png?v=20260815-v2-statewide"
+    "depthQueryPngPath": "./assets/connected-v2/COGs/Middletown%20Township/MiddletownTownshipHydraulicQuery5ft.png?v=20260815-v2-statewide",
+    "stageCodeScale": 10,
+    "stageCodeWidth": 3
   },
   "map": {
     "center": {

@@ -63,7 +63,9 @@
       "dynamic": "20260815-v2-statewide",
       "hydraulic": "20260815-v2-statewide"
     },
-    "depthQueryPngPath": "./assets/connected-v2/COGs/Middletown%20Township/MiddletownTownshipHydraulicQuery5ft.png?v=20260815-v2-statewide"
+    "depthQueryPngPath": "./assets/connected-v2/COGs/Middletown%20Township/MiddletownTownshipHydraulicQuery5ft.png?v=20260815-v2-statewide",
+    "stageCodeScale": 10,
+    "stageCodeWidth": 3
   },
   "map": {
     "center": {
