@@ -50,6 +50,19 @@
       "source_url": "https://nwis.waterdata.usgs.gov/nwis/peak?site_no=01407535&agency_cd=USGS&format=rdb"
     },
     {
+      "height_ft": 6.41,
+      "date": "2026-09-27",
+      "display_date": "September 27, 2026",
+      "datum": "NAVD88",
+      "site_no": "01407535",
+      "station_name": "Navesink River at Red Bank NJ",
+      "station_short": "Sea Bright",
+      "source_area": "stone-harbor-borough",
+      "station_priority": 3,
+      "record_type": "USGS annual storm-tide crest",
+      "source_url": "https://nwis.waterdata.usgs.gov/nwis/peak?site_no=01407535&agency_cd=USGS&format=rdb"
+    },
+    {
       "height_ft": 6.2,
       "date": "2010-03-13",
       "display_date": "March 13, 2010",
