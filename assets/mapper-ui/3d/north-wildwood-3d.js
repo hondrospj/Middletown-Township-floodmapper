@@ -881,11 +881,42 @@
     document.body.dataset.map3dBuildingWaterStageNavd88Ft = selectedStage === null ? "none" : selectedStage.toFixed(3);
   }
 
+  var atlasFloodDisplayUrls = new WeakMap();
+
+  function atlasFloodDisplayUrl(layer, originalUrl) {
+    var image = layer?.getElement?.();
+    if (!image || image.naturalWidth * image.naturalHeight < LARGE_ATLAS_PIXELS) return originalUrl;
+    var gl = glMap.getCanvas().getContext("webgl2");
+    var limit = gl?.getParameter(gl.MAX_TEXTURE_SIZE) || 2048;
+    var size = largeAtlasDisplaySize(image, limit);
+    var cached = atlasFloodDisplayUrls.get(layer);
+    if (cached?.source === originalUrl && cached.width === size.width && cached.height === size.height) return cached.url;
+    var canvas = document.createElement("canvas");
+    canvas.width = size.width;
+    canvas.height = size.height;
+    var context = canvas.getContext("2d");
+    if (!context) return originalUrl;
+    // Keep the catalog palette and transparency while fitting both 3D image
+    // consumers to the device. The original Leaflet layer is left intact.
+    try {
+      context.imageSmoothingEnabled = false;
+      context.drawImage(image, 0, 0, size.width, size.height);
+      var url = canvas.toDataURL("image/png");
+      if (!url.startsWith("data:image/png;base64,")) return originalUrl;
+      atlasFloodDisplayUrls.set(layer, { source: originalUrl, width: size.width, height: size.height, url: url });
+      return url;
+    } catch (_) {
+      return originalUrl;
+    }
+  }
+
+
   function syncFloodLayer3d() {
     if (!glMap || !glStyleReady) return;
     var request = pendingFlood3dRequest && pendingFlood3dRequest.isCurrent() ? pendingFlood3dRequest : null;
     var selectedLayer = request ? request.layer : currentFloodLayer;
-    var url = selectedLayer && (selectedLayer._url || selectedLayer._image && selectedLayer._image.src);
+    var originalUrl = selectedLayer && (selectedLayer._url || selectedLayer._image && selectedLayer._image.src);
+    var url = atlasFloodDisplayUrl(selectedLayer, originalUrl);
     var coordinates = selectedLayer?._worldFileAffine && selectedLayer._worldFileCorners
       ? selectedLayer._worldFileCorners.map(function (corner) { return [corner.lng, corner.lat]; })
       : coordinatesFromLeafletBounds(selectedLayer?.getBounds?.()) || activeFloodCoordinates();
@@ -961,7 +992,7 @@
     var accepted = false;
     try {
       syncFloodLayer3d();
-      var url = layer._url || layer.getElement?.()?.src;
+      var url = atlasFloodDisplayUrl(layer, layer._url || layer.getElement?.()?.src);
       var plane = floodPlaneLayer;
       var source = requestedMap.getSource("nw-flood-drape-source");
       // Both presentations already preload this URL. Certify both before the
