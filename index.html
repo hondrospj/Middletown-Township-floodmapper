@@ -16562,6 +16562,174 @@ document.querySelectorAll("#downloadExtentControl button[data-extent]").forEach(
 
 <script defer src="./assets/mapper-ui/modal-focus.js?v=77c8d9e9efcb920b"></script>
 <script data-nww-script="script-006" src="./assets/mapper-ui/app/alert-interaction.js?v=b02a3674db55dfda"></script>
+<script data-native-atlas-paint>
+// Chromium can reject explicit predecoding of large images which it can
+// still paint at their exact dimensions. Confirm the loaded native element
+// is drawable before allowing the normal layer and export code to use it.
+const decodeNativeFloodImage = decodeFloodFrameImage;
+decodeFloodFrameImage = async function (image) {
+  if (await decodeNativeFloodImage(image)) return true;
+  if (!(image?.complete && image.naturalWidth * image.naturalHeight >= 32_000_000)) return false;
+
+  const source = new URL(image.currentSrc || image.src, APP_BASE);
+  const roots = [...(TOWN_CONFIG.overlays.depthRoots || []), ...(TOWN_CONFIG.overlays.dynamicRoots || [])];
+  const isNativeAtlas = roots.some(root => {
+    const prefix = new URL(root, APP_BASE);
+    return prefix.origin === source.origin && source.pathname.startsWith(prefix.pathname);
+  });
+  if (!isNativeAtlas) return false;
+
+  const canvas = document.createElement('canvas');
+  canvas.width = canvas.height = 1;
+  try {
+    const context = canvas.getContext('2d', { willReadFrequently: true });
+    if (!context) return false;
+    context.drawImage(image, image.naturalWidth >> 1, image.naturalHeight >> 1, 1, 1, 0, 0, 1, 1);
+    context.getImageData(0, 0, 1, 1);
+    document.body.dataset.nativeAtlasPaint = 'ready';
+    return true;
+  } catch {
+    return false;
+  }
+};
+</script>
+<script data-native-atlas-presentation>
+// These towns keep the native depth atlas and exact point queries. Their
+// generated display overlays use a bounded grid with the same map corners.
+const LARGE_ATLAS_PIXELS = 32_000_000;
+
+function largeAtlasDisplaySize(image, dimensionLimit = 4096) {
+  const width = image.naturalWidth;
+  const height = image.naturalHeight;
+  const limit = Math.min(dimensionLimit, isCompactFloodmapperLayout() ? 2048 : 4096);
+  const scale = Math.min(1, limit / Math.max(width, height));
+  return { width: Math.max(1, Math.round(width * scale)), height: Math.max(1, Math.round(height * scale)) };
+}
+
+function sampleLargeAtlasPixels(image, width, height) {
+  const canvas = document.createElement("canvas");
+  const tileWidth = canvas.width = Math.min(image.naturalWidth, 4096);
+  const tileHeight = canvas.height = Math.min(image.naturalHeight, 256);
+  const context = canvas.getContext("2d", { willReadFrequently: true });
+  if (!context) throw new Error("Flood Stages canvas is unavailable.");
+  context.globalCompositeOperation = "copy";
+  const columns = Array.from({ length: width }, (_, x) => Math.floor((x + 0.5) * image.naturalWidth / width));
+  const rows = Array.from({ length: height }, (_, y) => Math.floor((y + 0.5) * image.naturalHeight / height));
+  const result = new Uint32Array(width * height);
+
+  // Safari can interpolate bytes when Canvas downscales a large PNG even with
+  // smoothing disabled. Read unscaled tiles and copy the exact source pixels
+  // so packed terrain elevations and uncertainty colors cannot be blended.
+  for (let top = 0; top < height;) {
+    const sourceTop = rows[top];
+    const sourceHeight = Math.min(tileHeight, image.naturalHeight - sourceTop);
+    let bottom = top + 1;
+    while (bottom < height && rows[bottom] < sourceTop + sourceHeight) bottom += 1;
+    for (let left = 0; left < width;) {
+      const sourceLeft = columns[left];
+      const sourceWidth = Math.min(tileWidth, image.naturalWidth - sourceLeft);
+      let right = left + 1;
+      while (right < width && columns[right] < sourceLeft + sourceWidth) right += 1;
+      context.drawImage(image, sourceLeft, sourceTop, sourceWidth, sourceHeight, 0, 0, sourceWidth, sourceHeight);
+      const pixels = context.getImageData(0, 0, sourceWidth, sourceHeight).data;
+      const nativePixels = new Uint32Array(pixels.buffer, pixels.byteOffset, sourceWidth * sourceHeight);
+      for (let y = top; y < bottom; y += 1) {
+        const sourceRow = (rows[y] - sourceTop) * sourceWidth;
+        const targetRow = y * width;
+        for (let x = left; x < right; x += 1) {
+          result[targetRow + x] = nativePixels[sourceRow + columns[x] - sourceLeft];
+        }
+      }
+      left = right;
+    }
+    top = bottom;
+  }
+  return new Uint8ClampedArray(result.buffer);
+}
+
+(() => {
+  const getNativeStageOverlay = getBathtubStageOverlayRecord;
+  let presentationGrid = null;
+
+  async function loadPresentationGrid(url) {
+    const image = await getDrainageRasterImage(url);
+    if (!image) throw new Error("Flood Stages terrain raster could not load.");
+    if (image.naturalWidth * image.naturalHeight < LARGE_ATLAS_PIXELS) return null;
+    const { width, height } = largeAtlasDisplaySize(image);
+    const values = sampleLargeAtlasPixels(image, width, height);
+    if (!values.some((value, index) => (index % 4 < 2) && value !== 0)) {
+      throw new Error("Flood Stages terrain raster did not decode.");
+    }
+    return { width, height, nativeWidth: image.naturalWidth, nativeHeight: image.naturalHeight, values };
+  }
+
+  function getPresentationGrid(url) {
+    if (presentationGrid?.url !== url) {
+      const request = loadPresentationGrid(url).catch(error => {
+        if (presentationGrid?.request === request) presentationGrid = null;
+        throw error;
+      });
+      presentationGrid = { url, request };
+    }
+    return awaitRasterRequest(presentationGrid.request);
+  }
+
+  getBathtubStageOverlayRecord = async function (stageValue, depthRecord = null) {
+    const stage = Number(stageValue);
+    if (!Number.isFinite(stage)) return null;
+    if (!DEPTH_QUERY_PNG_URL) return getNativeStageOverlay(stageValue, depthRecord);
+    const grid = await getPresentationGrid(DEPTH_QUERY_PNG_URL);
+    if (!grid) return getNativeStageOverlay(stageValue, depthRecord);
+
+    const { width, height, values } = grid;
+    const cache = bathtubStageOverlayCache;
+    const key = JSON.stringify(["bounded-atlas", stage, width, height, depthRecord?.url || null]);
+    if (cache.has(key)) return awaitRasterRequest(cache.get(key));
+    const releaseDepth = retainRasterObjectUrl(depthRecord?.url);
+    const request = (async () => {
+      try {
+        const canvas = document.createElement("canvas");
+        canvas.width = width;
+        canvas.height = height;
+        const context = canvas.getContext("2d", { willReadFrequently: true });
+        if (!context) return null;
+        const imageData = context.createImageData(width, height);
+        applyBathtubStagePixels(values, imageData.data, stage);
+        let uncertainPixelCount = 0;
+        if (depthRecord) {
+          const depthImage = await getDrainageRasterImage(depthRecord.url);
+          if (depthImage?.naturalWidth !== grid.nativeWidth || depthImage.naturalHeight !== grid.nativeHeight) {
+            throw new Error("Flood Depth uncertainty raster is unavailable or its grid does not match Flood Stages.");
+          }
+          uncertainPixelCount = applyStageUncertaintyPixels(sampleLargeAtlasPixels(depthImage, width, height), imageData.data);
+        }
+        context.putImageData(imageData, 0, 0);
+        return {
+          url: await canvasToDrainageObjectUrl(canvas),
+          filename: getOverlayFilename("dynamic", stage),
+          isBathtubStage: true,
+          uncertainPixelCount
+        };
+      } finally {
+        releaseDepth();
+      }
+    })().then(record => {
+      if (cache !== bathtubStageOverlayCache) {
+        retireRasterObjectUrl(record?.url);
+        return null;
+      }
+      if (record) return cacheBathtubStageOverlay(key, record);
+      cache.delete(key);
+      return null;
+    }, error => {
+      if (cache.get(key) === request) cache.delete(key);
+      throw error;
+    });
+    cache.set(key, request);
+    return awaitRasterRequest(request);
+  };
+})();
+</script>
 <script data-nww-script="script-007">
 
 const BUNNY_STORAGE_ZONE_ID = "";
